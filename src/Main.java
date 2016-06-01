@@ -2,12 +2,10 @@ public class Main {
     private static final String challengeFile = "/Users/nicholas/Downloads/synacor-challenge/challenge.bin";
 
     public static void main(String[] args) {
-        Disassembler VM = new Disassembler(challengeFile);
+        VM scvm = new VM();
+        scvm.loadProgram(challengeFile);
 
-        for (int i = 0; i < 32; i++)
-            System.out.print(VM.readNext() + " ");
-
-        System.out.println();
-
+        for (int i = 0; i < 368; i++)
+            scvm.step();
     }
 }

@@ -1,31 +1,40 @@
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
 
-public class Disassembler {
+class Disassembler {
     private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
     private final int[] OP_LENGTH = {0, 2, 1, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 0, 1, 1, 0};
     private FileInputStream fis;
 
-    public void printOperation(short[] a) {
+    void printOperation(int[] a) {
         System.out.print(OPERANDS[a[0]] + ": ");
         for (int i = 1; i < a.length; i++)
             System.out.print(a[i] + " ");
         System.out.println();
     }
 
-    public Disassembler(String theBinary) {
+    Disassembler(String theBinary) {
         File theFile = new File(theBinary);
         try {
             fis = new FileInputStream(theFile);
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
-            System.exit(252);
+        } catch (java.io.FileNotFoundException fnfe) {
+            System.err.println("%-FILE-NOT-FOUND: " + fnfe);
+            System.exit(404);
         }
     }
 
-    public int readNext() {
+    int[] getNextOpcode() {
+        int code = readNext();
+        int[] returnCodes = new int[OP_LENGTH[code] + 1];
+        returnCodes[0] = code;
+
+        for (int i = 1; i < returnCodes.length; i++)
+            returnCodes[i] = readNext();
+
+        return returnCodes;
+    }
+
+    private int readNext() {
         int theShort = -1;
 
         try {
@@ -34,7 +43,7 @@ public class Disassembler {
 
             theShort = high + low;
         } catch (java.io.IOException e) {
-            System.err.println(e);
+            System.err.println("IO Error: " + e);
             System.exit(253);
         }
         return theShort;
