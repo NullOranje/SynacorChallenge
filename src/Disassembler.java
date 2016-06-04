@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.LinkedList;
 
 class Disassembler {
     private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
@@ -34,8 +35,31 @@ class Disassembler {
         return returnCodes;
     }
 
+    int[] loadProgram(String theProgram) {
+        LinkedList<Integer> llProgram = new LinkedList<>();
+        File theFile = new File(theProgram);
+
+        try {
+            fis = new FileInputStream(theFile);
+            int b ;
+            while ((b = readNext()) >= 0) {
+                llProgram.add(b);
+                // b = readNext();
+            }
+        } catch (java.io.FileNotFoundException fnfe) {
+            System.out.println("%-FILE-NOT-FOUND: " + fnfe);
+            System.exit(404);
+        }
+
+        int[] theReturn = new int[32776];
+        for (int i = 0; i < llProgram.size(); i++)
+            theReturn[i] = llProgram.get(i);
+
+        return theReturn;
+    }
+
     private int readNext() {
-        int theShort = -1;
+        int theShort;
 
         try {
             int low = fis.read();
@@ -43,10 +67,12 @@ class Disassembler {
 
             theShort = high + low;
         } catch (java.io.IOException e) {
-            System.err.println("IO Error: " + e);
-            System.exit(253);
+            //System.err.println("IO Error: " + e);
+            // System.exit(253);
+            return -1;
         }
         return theShort;
     }
+
 
 }

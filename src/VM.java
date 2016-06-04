@@ -4,6 +4,8 @@ class VM {
     // Useful constants
     private final int B16 = 0xFFFF;
     private final int B15 = 0x7FFF;
+    private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
+    private final int[] OP_LENGTH = {0, 2, 1, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 0, 1, 1, 0};
 
     // Program Counter and Stack Pointer
     private int PC;
@@ -24,6 +26,7 @@ class VM {
         memory = new int[32776];
         stack = new int[1];
 
+        // TODO: Ensure the memory is populated somewhere.  Right now, I'm only reading the binary directly
         for (int i = 0; i < memory.length; i++) {
             memory[i] = 0;
         }
@@ -38,10 +41,23 @@ class VM {
 
     void loadProgram(String theProgram) {
         DVM = new Disassembler(theProgram);
+        memory = DVM.loadProgram(theProgram);
+        PC = 0; // Per the spec, set the program counter to 0
     }
 
     void step() {
-        executeCommand(DVM.getNextOpcode());
+        executeCommand(getNextOpcode());
+    }
+
+    int[] getNextOpcode() {
+        int code = memory[PC++];
+        int[] returnCodes = new int[OP_LENGTH[code] + 1];
+        returnCodes[0] = code;
+
+        for (int i = 1; i < returnCodes.length; i++)
+            returnCodes[i] = memory[PC++];
+
+        return returnCodes;
     }
 
     private void executeCommand(int[] opr) {
@@ -107,13 +123,13 @@ class VM {
     // opcode 1: set a, b
     private void set(int a, int b) {
         memory[a] = b;
-        advancePC(2);
+        // advancePC2);
     }
 
     // opcode 2: push a
     private void push(int a) {
         stack[SP++] = a;
-        advancePC(1);
+        // advancePC1);
     }
 
     // opcode 3: pop a
@@ -124,7 +140,7 @@ class VM {
         }
         memory[a] = stack[--SP];
 
-        advancePC(1);
+        // advancePC1);
     }
 
     // opcode 4: eq
@@ -134,7 +150,7 @@ class VM {
         else
             memory[a] = 0;
 
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 5: gt
@@ -144,7 +160,7 @@ class VM {
         else
             memory[a] = 0;
 
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 6: jmp
@@ -156,70 +172,66 @@ class VM {
     private void jt(int a, int b) {
         if (a > 0)
             jmp(b);
-        else
-            advancePC(2);
     }
 
     // opcode 8: jf
     private void jf(int a, int b) {
         if (a == 0)
             jmp(b);
-        else
-            advancePC(2);
     }
 
     // opcode 9: add
     private void add(int a, int b, int c) {
         memory[a] = (b + c) % B16;
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 10: mult
     private void mult(int a, int b, int c) {
         memory[a] = (b * c) % B16;
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 11:
     private void mod(int a, int b, int c) {
         memory[a] = (b % c);
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 12:
     private void and(int a, int b, int c) {
         memory[a] = (b & c);
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 13:
     private void or(int a, int b, int c) {
         memory[a] = (b | c);
-        advancePC(3);
+        // advancePC3);
     }
 
     // opcode 14:
     private void not(int a, int b) {
         b = b & B15;
         memory[a] = b ^ B15;
-        advancePC(2);
+        // advancePC2);
     }
 
     // opcode 15:
     private void rmem(int a, int b) {
         memory[a] = memory[b];
-        advancePC(2);
+        // advancePC2);
     }
 
     // opcode 16:
     private void wmem(int a, int b) {
         rmem(a, b);
-        advancePC(2);
+        // advancePC2);
     }
 
     // opcode 17: call
     private void call(int a) {
-        advancePC(1);
+        // advancePC1);
         PC = a;
     }
 
@@ -232,14 +244,14 @@ class VM {
     // opcode 19:
     private void out(int a) {
         System.out.print((char)a);
-        advancePC(1);
+        // advancePC1);
     }
 
     // opcode 20:
     private void in(int a) {
         try {
             memory[a] = System.in.read();
-            advancePC(1);
+            // advancePC1);
         } catch(IOException e) {
             System.err.println("%-IO-ERROR: " + e);
             System.exit(1010);
@@ -249,7 +261,7 @@ class VM {
     // opcode 21: noop
     // Do nothing
     private void noop() {
-        advancePC(0);
+        // advancePC0);
     }
 
     private void advancePC(int arguments) {
@@ -290,5 +302,13 @@ class VM {
         }
 
         return top;
+    }
+
+    public void debugMemory(int start, int length) {
+        for (int i = start; i < length; i++) {
+            System.out.print(memory[i] + " ");
+            if ((i - start) % 16 == 15)
+                System.out.println();
+        }
     }
 }
