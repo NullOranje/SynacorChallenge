@@ -4,6 +4,7 @@ class VM {
     // Useful constants
     private final int B16 = 0xFFFF;
     private final int B15 = 0x7FFF;
+    private final int B151 = 0x8000;
     private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
     private final int[] OP_LENGTH = {0, 2, 1, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 0, 1, 1, 0};
 
@@ -149,8 +150,6 @@ class VM {
             memory[a] = 1;
         else
             memory[a] = 0;
-
-        // advancePC3);
     }
 
     // opcode 5: gt
@@ -159,8 +158,6 @@ class VM {
             memory[a] = 1;
         else
             memory[a] = 0;
-
-        // advancePC3);
     }
 
     // opcode 6: jmp
@@ -250,7 +247,7 @@ class VM {
     // opcode 21: noop
     // Do nothing
     private void noop() {
-        // advancePC0);
+
     }
 
     private void advancePC(int arguments) {
