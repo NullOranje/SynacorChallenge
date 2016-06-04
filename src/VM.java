@@ -183,55 +183,46 @@ class VM {
     // opcode 9: add
     private void add(int a, int b, int c) {
         memory[a] = (b + c) % B16;
-        // advancePC3);
     }
 
     // opcode 10: mult
     private void mult(int a, int b, int c) {
         memory[a] = (b * c) % B16;
-        // advancePC3);
     }
 
     // opcode 11:
     private void mod(int a, int b, int c) {
         memory[a] = (b % c);
-        // advancePC3);
     }
 
     // opcode 12:
     private void and(int a, int b, int c) {
         memory[a] = (b & c);
-        // advancePC3);
     }
 
     // opcode 13:
     private void or(int a, int b, int c) {
         memory[a] = (b | c);
-        // advancePC3);
     }
 
     // opcode 14:
     private void not(int a, int b) {
         b = b & B15;
         memory[a] = b ^ B15;
-        // advancePC2);
     }
 
     // opcode 15:
     private void rmem(int a, int b) {
         memory[a] = memory[b];
-        // advancePC2);
     }
 
     // opcode 16:
     private void wmem(int a, int b) {
         rmem(a, b);
-        // advancePC2);
     }
 
     // opcode 17: call
     private void call(int a) {
-        // advancePC1);
         PC = a;
     }
 
@@ -243,16 +234,14 @@ class VM {
 
     // opcode 19:
     private void out(int a) {
-        System.out.print((char)a);
-        // advancePC1);
+        System.out.print((char) a);
     }
 
     // opcode 20:
     private void in(int a) {
         try {
             memory[a] = System.in.read();
-            // advancePC1);
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.err.println("%-IO-ERROR: " + e);
             System.exit(1010);
         }

@@ -63,7 +63,8 @@ class Disassembler {
 
         try {
             int low = fis.read();
-            int high = fis.read() << 8;
+            int high = fis.read();
+            high = high << 8;
 
             theShort = high + low;
         } catch (java.io.IOException e) {
