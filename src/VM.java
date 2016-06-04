@@ -56,7 +56,7 @@ class VM {
         returnCodes[0] = code;
 
         for (int i = 1; i < returnCodes.length; i++)
-            if (i == 1)
+            if ((i == 1))
                 returnCodes[i] = memory[PC++];
             else
                 returnCodes[i] = indirect(memory[PC++]);
@@ -110,12 +110,6 @@ class VM {
         else if (opr[0] == 21)
             noop();
     }
-
-    /*
-    public void enableRun() {
-        RUN = true;
-    }
-    */
 
     // All the operands
     // opcode 0: halt
@@ -211,7 +205,7 @@ class VM {
 
     // opcode 16:
     private void wmem(int a, int b) {
-        rmem(a, b);
+        memory[a] = b;
     }
 
     // opcode 17: call

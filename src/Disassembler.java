@@ -7,13 +7,6 @@ class Disassembler {
     private final int[] OP_LENGTH = {0, 2, 1, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 0, 1, 1, 0};
     private FileInputStream fis;
 
-    void printOperation(int[] a) {
-        System.out.print(OPERANDS[a[0]] + ": ");
-        for (int i = 1; i < a.length; i++)
-            System.out.print(a[i] + " ");
-        System.out.println();
-    }
-
     Disassembler(String theBinary) {
         File theFile = new File(theBinary);
         try {
@@ -22,6 +15,13 @@ class Disassembler {
             System.err.println("%-FILE-NOT-FOUND: " + fnfe);
             System.exit(404);
         }
+    }
+
+    void printOperation(int[] a) {
+        System.out.print(OPERANDS[a[0]] + ": ");
+        for (int i = 1; i < a.length; i++)
+            System.out.print(a[i] + " ");
+        System.out.println();
     }
 
     int[] getNextOpcode() {
@@ -41,7 +41,7 @@ class Disassembler {
 
         try {
             fis = new FileInputStream(theFile);
-            int b ;
+            int b;
             while ((b = readNext()) >= 0) {
                 llProgram.add(b);
                 // b = readNext();
