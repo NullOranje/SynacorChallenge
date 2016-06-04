@@ -175,12 +175,12 @@ class VM {
 
     // opcode 9: add
     private void add(int a, int b, int c) {
-        memory[a] = (b + c) % B16;
+        memory[a] = (b + c) % B151;
     }
 
     // opcode 10: mult
     private void mult(int a, int b, int c) {
-        memory[a] = (b * c) % B16;
+        memory[a] = (b * c) % B151;
     }
 
     // opcode 11:
