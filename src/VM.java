@@ -26,6 +26,7 @@ class VM {
         // Memory runs from 0 to 32767, registers from 32768 to 32775
         memory = new int[32776];
         stack = new int[1];
+        stack[0] = -1;
 
         for (int i = 0; i < memory.length; i++) {
             memory[i] = 0;
@@ -136,12 +137,7 @@ class VM {
 
     // opcode 3: pop a
     private void pop(int a) {
-        if (SP == 0) {
-            System.err.println("%-STACK-UNDERFLOW");
-            System.err.println("PC : " + PC);
-            System.exit(100);
-        }
-        memory[a] = stack[--SP];
+        memory[a] = popFromStack();
     }
 
     // opcode 4: eq
@@ -220,7 +216,8 @@ class VM {
 
     // opcode 17: call
     private void call(int a) {
-        PC = a;
+        pushToStack(PC);
+        jmp(a);
     }
 
     // opcode 18:
@@ -270,6 +267,8 @@ class VM {
         stack[SP++] = i;
         if (SP == stack.length) {
             int[] tempStack = new int[stack.length * 2];
+            for (int s = 0; s < tempStack.length; s++)
+                tempStack[s] = -1;
             System.arraycopy(stack, 0, tempStack, 0, stack.length);
             stack = tempStack;
         }
@@ -278,13 +277,15 @@ class VM {
     private int popFromStack() {
         if (SP == 0) {
             System.err.println("%-STACK-UNDERFLOW");
+            System.err.println("PC : " + PC);
             System.exit(100);
         }
 
         int top = stack[--SP];
+        stack[SP] = -1;
 
         // rebuild stack to optimize space
-        if (SP <= stack.length / 4) {
+        if (SP > 0 && SP <= stack.length / 4) {
             int[] tempStack = new int[stack.length / 4];
             System.arraycopy(stack, 0, tempStack, 0, SP);
             stack = tempStack;
