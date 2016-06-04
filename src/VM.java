@@ -2,10 +2,10 @@ import java.io.IOException;
 
 class VM {
     // Useful constants
-    private final int B16 = 0xFFFF;
-    private final int B15 = 0x7FFF;
+    private final int B16 = 0xFFFF;     // 65535
+    private final int B15 = 0x7FFF;     // 32767
     private final int B151 = 0x8000;
-    private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
+    // private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
     private final int[] OP_LENGTH = {0, 2, 1, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 0, 1, 1, 0};
 
     // Program Counter and Stack Pointer
@@ -27,7 +27,6 @@ class VM {
         memory = new int[32776];
         stack = new int[1];
 
-        // TODO: Ensure the memory is populated somewhere.  Right now, I'm only reading the binary directly
         for (int i = 0; i < memory.length; i++) {
             memory[i] = 0;
         }
@@ -50,13 +49,16 @@ class VM {
         executeCommand(getNextOpcode());
     }
 
-    int[] getNextOpcode() {
+    private int[] getNextOpcode() {
         int code = memory[PC++];
         int[] returnCodes = new int[OP_LENGTH[code] + 1];
         returnCodes[0] = code;
 
         for (int i = 1; i < returnCodes.length; i++)
-            returnCodes[i] = memory[PC++];
+            if (i == 1)
+                returnCodes[i] = memory[PC++];
+            else
+                returnCodes[i] = indirect(memory[PC++]);
 
         return returnCodes;
     }
@@ -108,15 +110,16 @@ class VM {
             noop();
     }
 
+    /*
     public void enableRun() {
         RUN = true;
     }
+    */
 
     // All the operands
     // opcode 0: halt
     private void halt() {
         RUN = false;
-        // advancePC(0);
         coreDump();
         System.exit(0);
     }
@@ -124,24 +127,21 @@ class VM {
     // opcode 1: set a, b
     private void set(int a, int b) {
         memory[a] = b;
-        // advancePC2);
     }
 
     // opcode 2: push a
     private void push(int a) {
-        stack[SP++] = a;
-        // advancePC1);
+        pushToStack(indirect(a));
     }
 
     // opcode 3: pop a
     private void pop(int a) {
         if (SP == 0) {
             System.err.println("%-STACK-UNDERFLOW");
+            System.err.println("PC : " + PC);
             System.exit(100);
         }
         memory[a] = stack[--SP];
-
-        // advancePC1);
     }
 
     // opcode 4: eq
@@ -162,18 +162,18 @@ class VM {
 
     // opcode 6: jmp
     private void jmp(int a) {
-        PC = a;
+        PC = indirect(a);
     }
 
     // opcode 7: jt
     private void jt(int a, int b) {
-        if (a > 0)
+        if (indirect(a) > 0)
             jmp(b);
     }
 
     // opcode 8: jf
     private void jf(int a, int b) {
-        if (a == 0)
+        if (indirect(a) == 0)
             jmp(b);
     }
 
@@ -257,15 +257,11 @@ class VM {
         return i;
     }
 
-    private void advancePC(int arguments) {
-        PC += 1 + arguments;
-    }
-
     private void coreDump() {
         System.out.println("%-CORE-DUMP");
         System.out.println("PC: " + PC + " SP: " + SP);
         for (int i = 0; i < 8; i++) {
-            System.out.print("r" + i + ": " + memory[32768 + i] + "  ");
+            System.out.print("r" + i + ": " + memory[B151 + i] + "  ");
         }
         System.out.println("\n%-END-CORE");
     }
