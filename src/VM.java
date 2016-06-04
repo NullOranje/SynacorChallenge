@@ -250,6 +250,13 @@ class VM {
 
     }
 
+    private int indirect(int i) {
+        if (i > B15)
+            return memory[i];
+
+        return i;
+    }
+
     private void advancePC(int arguments) {
         PC += 1 + arguments;
     }
