@@ -2,10 +2,10 @@ import java.io.IOException;
 
 class VM {
     // Useful constants
-    // private final int B16 = 0xFFFF;     // 65535
+    // private final int B16 = 0xFFFF;  // 65535
     private final int B15 = 0x7FFF;     // 32767
-    private final int B151 = 0x8000;
-    // private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
+    private final int B151 = 0x8000;    // 32768
+    private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
     private final int[] OP_LENGTH = {0, 2, 1, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 3, 2, 2, 2, 1, 0, 1, 1, 0};
 
     // Program Counter and Stack Pointer
@@ -21,8 +21,6 @@ class VM {
 
     // The file parser
     private Disassembler DVM;
-
-    private long callCounter;
 
     VM() {
         // Memory runs from 0 to 32767, registers from 32768 to 32775
@@ -41,8 +39,6 @@ class VM {
         SP = 0;
         PC = 0;
 
-        // DEBUGGING
-        callCounter = 0;
     }
 
     void loadProgram(String theProgram) {
@@ -70,9 +66,6 @@ class VM {
                 returnCodes[i] = memory[PC++];
             else
                 returnCodes[i] = indirect(memory[PC++]);
-
-        // Debugging
-        callCounter++;
 
         return returnCodes;
     }
@@ -127,7 +120,6 @@ class VM {
     // All the operands
     // opcode 0: halt
     private void halt() {
-        // RUN = false;
         coreDump();
         System.exit(0);
     }
@@ -229,8 +221,10 @@ class VM {
 
     // opcode 18:
     private void ret() {
-        // Pop from stack
-        jmp(popFromStack());
+        if (SP == 0)
+            halt();
+
+        PC = popFromStack();
     }
 
     // opcode 19:
