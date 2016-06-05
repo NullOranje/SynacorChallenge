@@ -58,6 +58,10 @@ class VM {
 
     private int[] getNextOpcode() {
         int code = memory[PC++];
+
+        if (code > 21)
+            halt();
+
         int[] returnCodes = new int[OP_LENGTH[code] + 1];
         returnCodes[0] = code;
 
@@ -66,6 +70,12 @@ class VM {
                 returnCodes[i] = memory[PC++];
             else
                 returnCodes[i] = indirect(memory[PC++]);
+
+        String debug = (PC - returnCodes.length) + ": " + OPERANDS[returnCodes[0]] + " ";
+        for (int i = 1; i < returnCodes.length; i++)
+            debug += returnCodes[i] + " ";
+
+        // System.out.println(debug);
 
         return returnCodes;
     }
@@ -210,7 +220,7 @@ class VM {
 
     // opcode 16:
     private void wmem(int a, int b) {
-        memory[memory[a]] = b;
+        memory[indirect(a)] = b;
     }
 
     // opcode 17: call
@@ -224,12 +234,12 @@ class VM {
         if (SP == 0)
             halt();
 
-        PC = popFromStack();
+        jmp(popFromStack());
     }
 
     // opcode 19:
     private void out(int a) {
-        System.out.print((char) a);
+        System.out.print((char) indirect(a));
     }
 
     // opcode 20:
@@ -266,7 +276,7 @@ class VM {
 
     private void pushToStack(int i) {
         stack[SP++] = i;
-        if (SP == stack.length) {
+        if (SP >= stack.length) {
             int[] tempStack = new int[stack.length * 2];
             for (int s = 0; s < tempStack.length; s++)
                 tempStack[s] = -1;
@@ -287,7 +297,7 @@ class VM {
 
         // rebuild stack to optimize space
         if (SP > 0 && SP <= stack.length / 4) {
-            int[] tempStack = new int[stack.length / 4];
+            int[] tempStack = new int[stack.length / 2];
             System.arraycopy(stack, 0, tempStack, 0, SP);
             stack = tempStack;
         }
