@@ -2,7 +2,7 @@ import java.io.IOException;
 
 class VM {
     // Useful constants
-    private final int B16 = 0xFFFF;     // 65535
+    // private final int B16 = 0xFFFF;     // 65535
     private final int B15 = 0x7FFF;     // 32767
     private final int B151 = 0x8000;
     // private final String[] OPERANDS = {"halt", "set", "push", "pop", "eq", "gt", "jmp", "jt", "jf", "add", "mult", "mod", "and", "or", "not", "rmem", "wmem", "call", "ret", "out", "in", "noop"};
@@ -22,6 +22,8 @@ class VM {
     // The file parser
     private Disassembler DVM;
 
+    private long callCounter;
+
     VM() {
         // Memory runs from 0 to 32767, registers from 32768 to 32775
         memory = new int[32776];
@@ -38,12 +40,20 @@ class VM {
         // Set initial registers
         SP = 0;
         PC = 0;
+
+        // DEBUGGING
+        callCounter = 0;
     }
 
     void loadProgram(String theProgram) {
         DVM = new Disassembler(theProgram);
         memory = DVM.loadProgram(theProgram);
         PC = 0; // Per the spec, set the program counter to 0
+    }
+
+    void run() {
+        while (RUN)
+            executeCommand(getNextOpcode());
     }
 
     void step() {
@@ -60,6 +70,9 @@ class VM {
                 returnCodes[i] = memory[PC++];
             else
                 returnCodes[i] = indirect(memory[PC++]);
+
+        // Debugging
+        callCounter++;
 
         return returnCodes;
     }
@@ -114,7 +127,7 @@ class VM {
     // All the operands
     // opcode 0: halt
     private void halt() {
-        RUN = false;
+        // RUN = false;
         coreDump();
         System.exit(0);
     }
@@ -205,7 +218,7 @@ class VM {
 
     // opcode 16:
     private void wmem(int a, int b) {
-        memory[a] = b;
+        memory[memory[a]] = b;
     }
 
     // opcode 17: call
@@ -217,7 +230,7 @@ class VM {
     // opcode 18:
     private void ret() {
         // Pop from stack
-        PC = popFromStack();
+        jmp(popFromStack());
     }
 
     // opcode 19:
@@ -286,13 +299,5 @@ class VM {
         }
 
         return top;
-    }
-
-    public void debugMemory(int start, int length) {
-        for (int i = start; i < length; i++) {
-            System.out.print(memory[i] + " ");
-            if ((i - start) % 16 == 15)
-                System.out.println();
-        }
     }
 }

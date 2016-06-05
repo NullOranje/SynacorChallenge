@@ -6,7 +6,6 @@ public class Main {
         scvm.loadProgram(challengeFile);
 
 
-        for (int i = 0; i < 500; i++)
-            scvm.step();
+        scvm.run();
     }
 }
